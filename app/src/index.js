@@ -1,76 +1,71 @@
-import Web3 from "web3";
-import metaCoinArtifact from "../../build/contracts/Crud.json";
 
-const App = {
-  web3: null,
-  account: null,
-  meta: null,
 
-  start: async function() {
-    const { web3 } = this;
+import Web3 from 'web3';
+import Crud from '../../build/contracts/Crud.json';
 
-    try {
-      // get contract instance
-      const networkId = await web3.eth.net.getId();
-      const deployedNetwork = metaCoinArtifact.networks[networkId];
-      this.meta = new web3.eth.Contract(
-        metaCoinArtifact.abi,
-        deployedNetwork.address,
-      );
+let web3;
+let crud;
 
-      // get accounts
-      const accounts = await web3.eth.getAccounts();
-      this.account = accounts[0];
-
-      this.refreshBalance();
-    } catch (error) {
-      console.error("Could not connect to contract or chain.");
+const initWeb3 = () => {
+  return new Promise((resolve, reject) => {
+    if(typeof window.ethereum !== 'undefined') {
+      const web3 = new Web3(window.ethereum);
+      window.ethereum.enable()
+        .then(() => {
+          resolve(
+            new Web3(window.ethereum)
+          );
+        })
+        .catch(e => {
+          reject(e);
+        });
+      return;
     }
-  },
-
-  refreshBalance: async function() {
-    const { getBalance } = this.meta.methods;
-    const balance = await getBalance(this.account).call();
-
-    const balanceElement = document.getElementsByClassName("balance")[0];
-    balanceElement.innerHTML = balance;
-  },
-
-  sendCoin: async function() {
-    const amount = parseInt(document.getElementById("amount").value);
-    const receiver = document.getElementById("receiver").value;
-
-    this.setStatus("Initiating transaction... (please wait)");
-
-    const { sendCoin } = this.meta.methods;
-    await sendCoin(receiver, amount).send({ from: this.account });
-
-    this.setStatus("Transaction complete!");
-    this.refreshBalance();
-  },
-
-  setStatus: function(message) {
-    const status = document.getElementById("status");
-    status.innerHTML = message;
-  },
+    if(typeof window.web3 !== 'undefined') {
+      return resolve(
+        new Web3(window.web3.currentProvider)
+      );
+    }
+    resolve(new Web3('http://localhost:9545'));
+  });
 };
 
-window.App = App;
+const initContract = () => {
+  const deploymentKey = Object.keys(Crud.networks)[0];
+  return new web3.eth.Contract(
+    Crud.abi, 
+    Crud
+      .networks[deploymentKey]
+      .address
+  );
+};
 
-window.addEventListener("load", function() {
-  if (window.ethereum) {
-    // use MetaMask's provider
-    App.web3 = new Web3(window.ethereum);
-    window.ethereum.enable(); // get permission to access accounts
-  } else {
-    console.warn(
-      "No web3 detected. Falling back to http://127.0.0.1:8545. You should remove this fallback when you deploy live",
-    );
-    // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-    App.web3 = new Web3(
-      new Web3.providers.HttpProvider("http://127.0.0.1:8545"),
-    );
-  }
+const initApp = () => {
+  const $create=document.getElementById("create");
+  const $createResult=document.getElementById("create-result");
+ let accounts =[];
+ web3.ethereum.getAccounts()
+ .then(_accounts=>{
+  accounts=_accounts;
+ })
 
-  App.start();
-});
+
+$create.addEventListener('submit',(e) =>{
+  e.preventDefault();
+  crud.methods.createUser(e.target.elements[0].value).send({from:accounts[0]})
+  .then( ()=>$createResult.innerHTML= ` User ${e.target.elements[0].value} created!`)
+}).catch (()=>{
+  $createResult.innerHTML= ` Error!`
+})
+document.addEventListener('DOMContentLoaded', () => {
+  initWeb3()
+    .then(_web3 => {
+      web3 = _web3;
+      crud = initContract();
+      initApp(); 
+    })
+    .catch(e => console.log(e.message));
+})
+
+
+}; 

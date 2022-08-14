@@ -18,23 +18,30 @@ contract Crud {
     }
 
     function read (uint _id)  view external  returns (uint, string memory)  {
-     for (uint i=0; i<users.length;i++){
-        if (users[i].id==_id){
-            return (users[i].id, users[i].name);
-        }
+     uint i = find (_id);
+    return (users[i].id, users[i].name);
+        
      }
-    }
+    
     function update (uint _id, string memory _name)  external  {
-     for (uint i=0; i<users.length;i++){
-        if (users[i].id==_id){
-            users[i].name = _name;
-                    }
-     }
+     uint i = find (_id);
+     users[i].name = _name;
+                    
+     
     }
 
    
    function deleteUser (uint _id) external  {
-    delete users[_id];
+    uint i = find (_id);
+    delete users[i];
    }
 
+
+  function find (uint id) internal view returns (uint){
+         for (uint i=0; i<users.length;i++){
+        if (users[i].id==id){
+            return i;
+        }
+     }
+  }
 }

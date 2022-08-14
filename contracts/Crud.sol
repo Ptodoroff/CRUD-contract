@@ -42,6 +42,7 @@ contract Crud {
         if (users[i].id==id){
             return i;
         }
+        revert ("User does not exist");
      }
   }
 }

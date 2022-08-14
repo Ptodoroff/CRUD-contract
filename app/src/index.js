@@ -5,6 +5,7 @@ import Crud from '../../build/contracts/Crud.json';
 
 let web3;
 let crud;
+let accounts =[];
 
 const initWeb3 = () => {
   return new Promise((resolve, reject) => {
@@ -43,8 +44,7 @@ const initContract = () => {
 const initApp = () => {
   const $create=document.getElementById("create");
   const $createResult=document.getElementById("create-result");
- let accounts =[];
- web3.ethereum.getAccounts()
+ web3.eth.getAccounts()
  .then(_accounts=>{
   accounts=_accounts;
  })
@@ -54,9 +54,11 @@ $create.addEventListener('submit',(e) =>{
   e.preventDefault();
   crud.methods.createUser(e.target.elements[0].value).send({from:accounts[0]})
   .then( ()=>$createResult.innerHTML= ` User ${e.target.elements[0].value} created!`)
-}).catch (()=>{
+.catch (()=>{
   $createResult.innerHTML= ` Error!`
 })
+})
+}
 document.addEventListener('DOMContentLoaded', () => {
   initWeb3()
     .then(_web3 => {
@@ -68,4 +70,3 @@ document.addEventListener('DOMContentLoaded', () => {
 })
 
 
-}; 

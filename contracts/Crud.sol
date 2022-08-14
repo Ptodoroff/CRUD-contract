@@ -8,7 +8,7 @@ contract Crud {
     }
 
     User[] public users;
-    uint public nextId=0;
+    uint public nextId=1;                               // I initialise this as 1, because even if there is no struct element in the struct array at index 0, Solidity will initialise such struct at 0, which is not correct from a logical standpoint
 
     function createUser (string memory _name) public {
       User memory user =User(nextId,_name);

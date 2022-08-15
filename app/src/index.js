@@ -71,7 +71,7 @@ $read.addEventListener('submit', (e) =>{
   e.preventDefault();
   let result = e.target.elements[0].value;
   crud.methods.read(result).call()
-  .then(receipt=>$readResult.innerHTML=` id: ${receipt[0]}, name: ${receipt[1]}`)
+  .then(receipt=>$readResult.innerHTML=` id:${receipt[0]} name: ${receipt[1]}`)
   .catch(() => {
      $readResult.innerHTML= "Error, enter a valid id!!"
   })
@@ -110,6 +110,18 @@ $delete.addEventListener('submit', (e) =>{
 
 })
 
+//----------------------------------------------------------------------------
+//connecting the getCount fn() ot the frontend.
+
+const $count = document.getElementById("count");
+const $countButton = document.getElementById("press");
+
+$countButton.addEventListener('click',() =>{
+
+crud.methods.getCount().call()
+.then (receipt =>$count.innerHTML=`${receipt[0]}`)
+
+})
 
 
 

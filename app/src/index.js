@@ -42,13 +42,15 @@ const initContract = () => {
 };
 
 const initApp = () => {
+
+  //--------------------------------------------------------------- 
+  //connecting the createUser fn() to the frontend.
   const $create=document.getElementById("create");
   const $createResult=document.getElementById("create-result");
  web3.eth.getAccounts()
  .then(_accounts=>{
   accounts=_accounts;
  })
-
 
 $create.addEventListener('submit',(e) =>{
   e.preventDefault();
@@ -58,7 +60,73 @@ $create.addEventListener('submit',(e) =>{
   $createResult.innerHTML= ` Error!`
 })
 })
+
+//----------------------------------------------------------------------------
+//connecting the read fn() ot the frontend.
+
+const $read = document.getElementById("read");
+const $readResult = document.getElementById("read-result");
+
+$read.addEventListener('submit', (e) =>{
+  e.preventDefault();
+  let result = e.target.elements[0].value;
+  crud.methods.read(result).call()
+  .then(receipt=>$readResult.innerHTML=` id: ${receipt[0]}, name: ${receipt[1]}`)
+  .catch(() => {
+     $readResult.innerHTML= "Error, enter a valid id!!"
+  })
+
+})
+//----------------------------------------------------------------------------
+//connecting the update fn() ot the frontend.
+
+const $update = document.getElementById("edit");
+const $updateResult = document.getElementById("edit-result");
+
+$update.addEventListener('submit', (e) =>{
+  e.preventDefault();
+  let id=e.target.elements[0].value;
+  let name=e.target.elements[1].value;
+    crud.methods.update(id,name).send({from:accounts[0]})
+    .then(()=>$updateResult.innerHTML=`id ${id} updated to ${name}`)
+    .catch(()=>{
+      console.log (` Error while updating the selected id`)
+    })
+})
+
+//----------------------------------------------------------------------------
+//connecting the update fn() ot the frontend.
+const $delete = document.getElementById("delete");
+const $deleteResult = document.getElementById("delete-result");
+
+$delete.addEventListener('submit', (e) =>{
+  e.preventDefault();
+  let result = e.target.elements[0].value;
+  crud.methods.deleteUser(result).send({from:accounts[0]})
+  .then(()=>$deleteResult.innerHTML=` user: deleted!`)
+  .catch(() => {
+     $deleteResult.innerHTML= "Error, enter a valid id!!"
+  })
+
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
+
 document.addEventListener('DOMContentLoaded', () => {
   initWeb3()
     .then(_web3 => {
